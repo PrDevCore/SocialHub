@@ -5,12 +5,12 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     domains:
-      - socialhub-sint.onrender.com
+      - api.prsocialhub.space
     envVars:
       - key: NODE_VERSION
         value: 20
       - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-        sync: false
+        value: pk_live_Y2xlcmsuc29jaWFsaHViLWZyb250ZW5kLWNmZXoub25yZW5kZXIk
       - key: CLERK_SECRET_KEY
         sync: false
       - key: NEXT_PUBLIC_CLERK_SIGN_IN_URL
@@ -22,7 +22,7 @@ services:
       - key: NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
         value: /dashboard
       - key: NEXT_PUBLIC_API_BASE_URL
-        value: https://socialhub-sint.onrender.com
+        value: https://api.prsocialhub.space
       - key: GEMINI_API_KEY
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_URL
@@ -36,4 +36,4 @@ services:
       - key: NEXT_PUBLIC_ENV
         value: production
       - key: NEXT_PUBLIC_BASE_URL
-        value: /
+        value: https://api.prsocialhub.space
