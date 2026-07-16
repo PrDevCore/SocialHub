@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: socialsphere
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    domains:
+      - socialhub-sint.onrender.com
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_CLERK_SIGN_IN_URL
+        value: /
+      - key: NEXT_PUBLIC_CLERK_SIGN_UP_URL
+        value: /
+      - key: NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
+        value: /dashboard
+      - key: NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
+        value: /dashboard
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://socialhub-sint.onrender.com
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://syicaszkmcnglygzxhnk.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aWNhc3prbWNuZ2x5Z3p4aG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NTE1NzEsImV4cCI6MjA5OTEyNzU3MX0.UDvSGluOKQCgdC6m09JzwjWmbaDXnkxCQ2ozNURXfqE
+      - key: NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET
+        value: post-media
+      - key: NEXT_PUBLIC_POST_FOR_ME_CLIENT_ID
+        value: pfm_live_JQ86eTcYoHB7vcpaWtZFnh
+      - key: NEXT_PUBLIC_ENV
+        value: production
+      - key: NEXT_PUBLIC_BASE_URL
+        value: /
