@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "SocialSphere - AI Social Media Hub",
+  title: "PR Social Space - AI Social Media Hub",
   description: "Automate and publish your social content with AI.",
 };
 

@@ -14,8 +14,8 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 mx-auto max-w-7xl px-6 py-6 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">S</div>
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">SocialSphere</span>
+          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">P</div>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">PR Social Space</span>
         </div>
         
         <div>

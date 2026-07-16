@@ -62,8 +62,8 @@ export default function DashboardPage() {
       <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900/50 px-6 backdrop-blur-md">
         <div className="flex items-center space-x-6">
           <Link href="/" className="text-lg font-bold text-white flex items-center space-x-2">
-            <span className="bg-indigo-600 px-2 py-0.5 rounded text-sm text-white">S</span>
-            <span className="hidden sm:inline">SocialSphere Workspace</span>
+            <span className="bg-indigo-600 px-2 py-0.5 rounded text-sm text-white">P</span>
+            <span className="hidden sm:inline">PR Social Space</span>
           </Link>
           <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold border-l border-slate-800 pl-6">Production Studio</span>
         </div>
