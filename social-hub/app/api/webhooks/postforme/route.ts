@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { recordAccountConnected } from "@/lib/store";
+import { logger } from "@/lib/logger";
 
 /**
  * Server-to-server webhook from Post for Me. Configure this URL
@@ -39,21 +40,32 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-postforme-signature");
 
   if (!verifySignature(rawBody, signature)) {
+    logger.warn("Invalid webhook signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const event = JSON.parse(rawBody) as {
-    type: string;
-    data: { id: string; platform: string; external_id: string };
-  };
+  try {
+    const event = JSON.parse(rawBody) as {
+      type: string;
+      data: { id: string; platform: string; external_id: string };
+    };
 
-  if (event.type === "social.account.created") {
-    await recordAccountConnected({
-      userId: event.data.external_id, // this is the Clerk userId we passed as external_id
-      accountId: event.data.id,
-      platform: event.data.platform,
-    });
+    if (event.type === "social.account.created") {
+      await recordAccountConnected({
+        userId: event.data.external_id,
+        accountId: event.data.id,
+        platform: event.data.platform,
+      });
+      logger.info("Account connected via webhook", {
+        userId: event.data.external_id,
+        accountId: event.data.id,
+        platform: event.data.platform,
+      });
+    }
+
+    return NextResponse.json({ received: true });
+  } catch (err) {
+    logger.error("Webhook processing failed", { error: err });
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 502 });
   }
-
-  return NextResponse.json({ received: true });
 }

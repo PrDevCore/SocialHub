@@ -35,6 +35,8 @@ async function pfmFetch<T>(
       ...init.headers,
     },
     cache: "no-store",
+    // Time out upstream requests after 15 seconds to prevent hanging
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!res.ok) {

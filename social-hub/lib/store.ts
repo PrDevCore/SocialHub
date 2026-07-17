@@ -1,74 +1,93 @@
 import "server-only";
-import { promises as fs } from "fs";
-import path from "path";
+import { getSupabaseAdmin } from "./supabase";
+import { logger } from "./logger";
 
-/**
- * Minimal file-backed persistence standing in for your "Custom Backend"
- * database. It stores per-user post history and account nicknames that
- * live in YOUR system (Post for Me remains the source of truth for OAuth
- * tokens and account status).
- *
- * Swap this module for Prisma + Postgres/MySQL in production — every
- * function signature below is what a real ORM layer would expose, so
- * nothing else in the app needs to change.
- */
-
-const DATA_FILE = path.join(process.cwd(), "data", "db.json");
-
-interface PostRecord {
-  id: string; // Post for Me social_post id
-  userId: string; // Clerk userId
+export interface PostRecord {
+  id: string;
+  user_id: string;
   caption: string;
-  socialAccountIds: string[];
+  social_account_ids: string[];
   status: string;
-  createdAt: string;
+  created_at: string;
 }
 
-interface DbShape {
-  posts: PostRecord[];
-  connectedAccountEvents: Array<{
-    userId: string;
-    accountId: string;
-    platform: string;
-    receivedAt: string;
-  }>;
+export interface ConnectedAccountEvent {
+  user_id: string;
+  account_id: string;
+  platform: string;
+  received_at: string;
 }
 
-async function readDb(): Promise<DbShape> {
-  try {
-    const raw = await fs.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return { posts: [], connectedAccountEvents: [] };
+export async function recordPost(record: {
+  id: string;
+  user_id: string;
+  caption: string;
+  social_account_ids: string[];
+  status: string;
+}) {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("posts")
+    .insert({
+      id: record.id,
+      user_id: record.user_id,
+      caption: record.caption,
+      social_account_ids: record.social_account_ids,
+      status: record.status,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    logger.error("Failed to record post", { error, record });
+    throw new Error(`Failed to record post: ${error.message}`);
   }
-}
 
-async function writeDb(db: DbShape) {
-  await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(db, null, 2));
-}
-
-export async function recordPost(record: PostRecord) {
-  const db = await readDb();
-  db.posts.unshift(record);
-  await writeDb(db);
+  logger.info("Post recorded", { postId: data.id, userId: data.user_id });
+  return data as PostRecord;
 }
 
 export async function listPostsForUser(userId: string) {
-  const db = await readDb();
-  return db.posts.filter((p) => p.userId === userId);
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("posts")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    logger.error("Failed to list posts", { error, userId });
+    throw new Error(`Failed to list posts: ${error.message}`);
+  }
+
+  return (data ?? []) as PostRecord[];
 }
 
-/** Called from the Post for Me webhook when social.account.created fires. */
 export async function recordAccountConnected(entry: {
   userId: string;
   accountId: string;
   platform: string;
 }) {
-  const db = await readDb();
-  db.connectedAccountEvents.unshift({
-    ...entry,
-    receivedAt: new Date().toISOString(),
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("connected_account_events")
+    .insert({
+      user_id: entry.userId,
+      account_id: entry.accountId,
+      platform: entry.platform,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    logger.error("Failed to record account connected", { error, entry });
+    throw new Error(`Failed to record account: ${error.message}`);
+  }
+
+  logger.info("Account connected recorded", {
+    userId: entry.userId,
+    accountId: entry.accountId,
+    platform: entry.platform,
   });
-  await writeDb(db);
+  return data as ConnectedAccountEvent;
 }

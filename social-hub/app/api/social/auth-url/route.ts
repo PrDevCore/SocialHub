@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { createAuthUrl, SocialPlatform } from "@/lib/postforme";
+import { createAuthUrl } from "@/lib/postforme";
+import { logger } from "@/lib/logger";
+import { AuthUrlSchema } from "@/lib/validation";
 
 // [ Call Post for Me Auth URL Endpoint ]
 // The frontend hits this route after the user clicks "Connect X account".
@@ -8,17 +10,24 @@ import { createAuthUrl, SocialPlatform } from "@/lib/postforme";
 // get back is scoped to this user (see lib/postforme.ts + Post for Me's
 // "Multi-User Applications" guide).
 export async function POST(req: NextRequest) {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { platform } = (await req.json()) as { platform?: SocialPlatform };
-  if (!platform) {
-    return NextResponse.json({ error: "platform is required" }, { status: 400 });
-  }
-
   try {
+    const body = await req.json();
+    const validation = AuthUrlSchema.safeParse(body);
+
+    if (!validation.success) {
+      logger.warn("Validation failed", { errors: validation.error.flatten() });
+      return NextResponse.json(
+        { error: "Validation failed", details: validation.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { platform } = validation.data;
     const appUrl = process.env.APP_URL ?? req.nextUrl.origin;
 
     // LinkedIn on Quickstart requires connection_type "organization",
@@ -39,9 +48,10 @@ export async function POST(req: NextRequest) {
       permissions: ["posts", "feeds"],
     });
 
+    logger.info("Auth URL created", { userId, platform });
     return NextResponse.json({ url });
   } catch (err) {
-    console.error(err);
+    logger.error("Failed to create auth URL", { error: err, userId });
     return NextResponse.json(
       { error: "Failed to create auth URL" },
       { status: 502 }

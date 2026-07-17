@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 // [ Your Frontend Login ]
 // If the user already has a Clerk session, skip straight to /dashboard.
-export default function Home() {
-  const { userId } = auth();
+export default async function Home() {
+  const { userId } = await auth();
   if (userId) redirect("/dashboard");
 
   return (

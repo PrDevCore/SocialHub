@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { listSocialAccounts, SocialAccount } from "@/lib/postforme";
+import { logger } from "@/lib/logger";
 import SocialDashboard from "@/components/SocialDashboard";
 
 // [ Redirect to /dashboard ]
@@ -10,7 +11,7 @@ export default async function DashboardPage({
 }: {
   searchParams: { isSuccess?: string; provider?: string; error?: string };
 }) {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) return null;
 
   let accounts: SocialAccount[] = [];
@@ -19,7 +20,7 @@ export default async function DashboardPage({
     const res = await listSocialAccounts(userId);
     accounts = res.data;
   } catch (err) {
-    console.error(err);
+    logger.error("Failed to load social accounts", { error: err, userId });
     loadError =
       "Couldn't reach Post for Me. Check POSTFORME_API_KEY in your environment.";
   }
